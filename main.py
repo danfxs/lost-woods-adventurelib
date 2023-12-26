@@ -6,6 +6,7 @@ from Help import Help
 from Enemies import Enemy, Wolf, Goblin, Ogro
 import random
 import copy
+import time
 
 name_character = input('Qual o nome do seu personagem? ')
 character = MainCharacter(name_character)
@@ -14,10 +15,10 @@ game = Game()
 
 current_room = Room("")
 latest_room = Room("")
-floresta = Room("clareira no meio da floresta")
-caverna = Room("entrada de uma caverna")
+floresta = Room("uma clareira no meio da floresta")
+caverna = Room("uma entrada de uma caverna")
 caverna_deposito = Room("uma parte da caverna que contem diversas caixas, algumas mesas e cadeiras")
-caverna_final = Room("uma grande sala com dois pilares até o teto com um portal ao fundo emitindo um brilho vermelho")
+caverna_final = Room("uma grande sala com dois pilares simétricos até a parte superior da caverna. Também é possível enxergar um portal na outra extremidade da sala emitindo um brilho vermelho no seu interior")
 floresta_batalha = Room("O vento sopra através das arvores levando o rosnado raivoso do lobo a sua frente")
 
 enemy = None
@@ -60,14 +61,18 @@ def irParaDirecao(direcao):
 
 def check_win():
     global character
+    time.sleep(2)
     if (get_context() == "caverna.deposito"):
         say(f"{character.name} pega a espada do goblin com muita apreciação")
         crude_sword_description = "uma espada rústica"
         crude_sword = Item(crude_sword_description)
         character.getItem(crude_sword)
         character.equip(crude_sword_description, 8)
-    elif (get_context() == "caverna.final"):
-        say("aqui")
+        time.sleep(2)
+    elif (get_context() == "caverna.decisao"):
+        say(f"Após derrotar o ogro, {character.name} anda até a outra extremidade da sala analisando os pilares")
+        time.sleep(2)
+        say(f"Após investigar o portal e o brilho vermelho, {character.name} se pergunta se deveria [entrar no portal] ou [quebrar o portal].")
 
 @when("atacar", context="batalha")
 def atacar_batalha():
@@ -135,13 +140,15 @@ def caverna_direta():
 
 @when("procurar", context="caverna.deposito")
 def procurar():
-    global character
+    global character, current_room, caverna_final
     recovered_hp = random.randint(1, 4) + random.randint(1, 4)
     character.health_points += recovered_hp
     say(f"Diversas caixas estão espalhadas e abrindo, uma a uma, foi possível encontrar um vidro com um líquido vermelho")
     say(f"{character.name} bebe todo o líquido vermelho recuperando {recovered_hp}HP")
     say(f"Como não há mais nada de útil nas caixas, {character.name} segue adiante")
     set_context("caverna.final")
+    current_room = caverna_final
+    exibir_personagem_esta()
 
 @when("continuar", context="caverna.deposito")
 def continuar():
@@ -149,23 +156,61 @@ def continuar():
     say(f"Com bastante moral, {character.name} segue adiante no caminho")
     current_room = caverna_final
     set_context("caverna.final")
+    exibir_personagem_esta()
+
+def exibir_personagem_esta():
+    global character, current_room
+    say(f"{character.name} está {current_room}")
 
 @when("QUALQUERCOISA", context="caverna.final")
-def caverna_final(qualquercoisa):
+def caverna_final_action(qualquercoisa):
     global character, game, enemy, ogro, latest_context, latest_room, caverna_final, current_room
     if (not game.checkIfFinalBossDefeated()):
-        say(f"Da escuridão, trepidações no chão são sentidas pelos pés de {character.name}, até seus olhos perceberem um ogro gigante vindo em sua direção")
+        say(f"Através do portal, trepidações no chão são sentidas pelos pés de {character.name}, até seus olhos perceberem um ogro gigante vindo em sua direção")
         game.enterBattleFinalBoss()
         enemy = copy.copy(ogro)
         set_context("batalha")
-        latest_context = "caverna.final"
+        latest_context = "caverna.decisao"
         latest_room = caverna_final
         current_room = caverna_final
     else:
         exibir_final()
 
 def exibir_final():
-    pass
+    global character
+    say(f"Após derrotar o ogro, {character.name} anda até a outra extremidade da sala analisando os pilares")
+    time.sleep(2)
+    say(f"Após investigar o portal e o brilho vermelho, {character.name} se pergunta se deveria [entrar no portal] ou [quebrar o portal].")
+
+@when("entrar no portal", context="caverna.decisao")
+def entrar_portal():
+    global character
+    say(f"{character.name} enche os pulmões de ar como se aquela ação aumentasse sua coragem e coloca o seu braço através do portal")
+    time.sleep(3)
+    say(f"Ficando com mais ânimo, resolve andar através do portal")
+    time.sleep(3)
+    say(f"Tudo fica claro, impossível de distinguir quaisquer coisas que estariam ao seu redor")
+    time.sleep(3)
+    say(f"Ao tempo que sua visão fica melhor, {character.name} percebe que está sentado na frente de uma máquina eletrônica escrevendo ações e esperando resultados")
+    time.sleep(4)
+    say(f"{character.name} se sentindo a tranquilidade do local, sua memória volta e se lembra que está em casa")
+    time.sleep(3)
+    say(f"Com um sorriso de ponta a ponta, {character.name} segue em direção ao seu quarto para encontrar sua cama e dormir para recuperar as forças para uma próxima aventura")
+    sair()
+
+@when("quebrar portal", context="caverna.decisao")
+def quebrar_portal():
+    global character
+    say(f"Com {character.weapon}, {character.name} começa a danificar o portal")
+    time.sleep(2)
+    say(f"O brilho do portal diminui lentamente até escurecer totalmente")
+    time.sleep(2)
+    say(f"{character.name} vê o formato do portal desmoronando aos seus pés")
+    time.sleep(2)
+    say(f"Um rugido estremece a escuridão quando a destruição do portal se completa")
+    time.sleep(2)
+    say(f"{character.name} dá meia volta em direção da entrada da caverna, respira fundo e espera sobreviver nesse novo lugar desconhecido")
+    sair()
 
 
 print("""

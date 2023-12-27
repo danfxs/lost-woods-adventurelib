@@ -23,5 +23,5 @@ class Help:
                 say(self.lang["action_enter_portal"] + " -> " + self.lang["help_cavern_decision_1"])
                 say(self.lang["action_break_portal"] + " -> " + self.lang["help_cavern_decision_2"])
         say(self.lang["action_where_i_am"] + " -> " + self.lang["help_where"])
-        say(self.lang["action_cavern_continue"] + " -> " + self.lang["help_help"])
-        say(self.lang["action_cavern_search"] + " -> " + self.lang["help_exit"])
+        say(self.lang["action_help"] + " -> " + self.lang["help_help"])
+        say(self.lang["action_exit"] + " -> " + self.lang["help_exit"])

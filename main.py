@@ -38,9 +38,9 @@ cavern_warehouse = Room(lang["cavern_warehouse_room"])
 cavern_final = Room(lang["cavern_final_room"])
 
 enemy = None
-wolf = Wolf(4, 5, lang)
-goblin = Goblin(6, 5, lang)
-ogre = Ogre(8, 5, lang)
+wolf = Wolf(5, 20, lang)
+goblin = Goblin(6, 30, lang)
+ogre = Ogre(7, 40, lang)
 
 @when(lang["action_who_am_i"])
 def who_am_i():
@@ -102,6 +102,8 @@ def attack_battle():
     else:
         vl_attack = enemy.attack_action()
         character.health_points -= vl_attack
+        if (character.isDead()):
+            game_over()
 
 @when(lang["action_battle_defend"], context="battle")
 def defend_battle():
@@ -109,12 +111,14 @@ def defend_battle():
     vl_defesa = character.defend_action()
     vl_ataque = enemy.attack_action()
     character.health_points = character.health_points - vl_ataque + min(vl_defesa, vl_ataque)
+    if (character.isDead()):
+            game_over()
 
 @when(lang["action_battle_escape"], context="battle")
 def escape_battle():
     global character, enemy, latest_context, current_room, latest_room
     if enemy.canRun():
-        prob = character.health_points + character.destreza
+        prob = character.health_points + character.dexterity + random.randint(1, 20)
         say(lang["escape_action"].format(character.name, prob))
         if (random.randint(1, 100) < prob):
             say(lang["escape_success"].format(character.name))
@@ -123,13 +127,18 @@ def escape_battle():
         else:
             say(lang["escape_fail"].format(character.name))
             character.health_points = character.health_points - enemy.attack_action()
+            if (character.isDead()):
+                game_over()
     else:
         say(lang["escape_impossible"].format(character.name))
+        character.health_points = character.health_points - enemy.attack_action()
+        if (character.isDead()):
+            game_over()
 
 @when(lang["action_cavern_left"], context="cavern.entrance")
 def cavern_left():
     global character, latest_context, goblin, enemy, latest_room, cavern_warehouse
-    say(lang["cavern_entrance_1"])
+    say(lang["cavern_entrance_1"].format(character.name))
     say(lang["cavern_entrance_2"].format(character.name))
     say(lang["cavern_entrance_3"].format(character.name))
     latest_context = "cavern.warehouse"
@@ -137,11 +146,11 @@ def cavern_left():
     enemy = copy.copy(goblin)
     set_context("battle")
 
-@when(lang["action_cavern_left"], context="cavern.entrance")
+@when(lang["action_cavern_right"], context="cavern.entrance")
 def cavern_right():
     global character, current_room, cavern_final
     say(lang["cavern_right"].format(character.name))
-    prob = character.health_points + character.destreza
+    prob = character.health_points + character.dexterity
     if random.randint(1, 100) < prob:
         say(lang["cavern_trap_success_1"].format(character.name))
         say(lang["cavern_trap_success_2"].format(character.name))
@@ -181,7 +190,7 @@ def show_where_character():
 def cavern_final_action(anything):
     global character, game, enemy, ogre, latest_context, latest_room, cavern_final, current_room
     if (not game.checkIfFinalBossDefeated()):
-        say(lang["cavern_final"].format(character.name))
+        say(lang["cavern_final"].format(character.name, character.name))
         game.enterBattleFinalBoss()
         enemy = copy.copy(ogre)
         set_context("battle")
@@ -202,7 +211,7 @@ def enter_portal():
     global character
     say(lang["enter_portal_1"].format(character.name))
     time.sleep(3)
-    say(lang["enter_portal_2"])
+    say(lang["enter_portal_2"].format(character.name))
     time.sleep(3)
     say(lang["enter_portal_3"])
     time.sleep(3)
@@ -213,7 +222,7 @@ def enter_portal():
     say(lang["enter_portal_6"].format(character.name))
     exit_action()
 
-@when(lang["action_break_portal"], context="caverna.decisao")
+@when(lang["action_break_portal"], context="cavern.decision")
 def quebrar_portal():
     global character
     say(lang["break_portal_1"].format(character.weapon, character.name))
@@ -227,6 +236,15 @@ def quebrar_portal():
     say(lang["break_portal_5"].format(character.name))
     exit_action()
 
+def game_over():
+    global character
+    say(lang["game_over_1"].format(character.name))
+    time.sleep(2)
+    say(lang["game_over_2"].format(character.name))
+    time.sleep(2)
+    say(lang["game_over_3"].format(character.name))
+    time.sleep(2)
+    exit_action()
 
 print(lang["begin_game"])
 

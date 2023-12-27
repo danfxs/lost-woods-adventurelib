@@ -35,3 +35,6 @@ class MainCharacter(Item):
         if weapon:
             self.weapon = weapon
             self.weapon_atk = weapon_atk
+    
+    def isDead(self) -> bool:
+        return (self.health_points <= 0)

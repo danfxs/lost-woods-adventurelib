@@ -6,7 +6,7 @@ import time
 from MainCharacter import MainCharacter
 from Game import Game
 from Help import Help
-from Enemies import Enemy, Wolf, Goblin, Ogro
+from Enemies import Enemy, Wolf, Goblin, Ogre
 from languages.lang_eng import lang_eng
 from languages.lang_ptbr import lang_ptbr
 
@@ -26,7 +26,7 @@ else:
     lang = lang_ptbr
 
 name_character = input(lang["character_name"])
-character = MainCharacter(name_character)
+character = MainCharacter(name_character, lang)
 
 game = Game()
 
@@ -38,23 +38,20 @@ cavern_warehouse = Room(lang["cavern_warehouse_room"])
 cavern_final = Room(lang["cavern_final_room"])
 
 enemy = None
-wolf = Wolf(4, 5)
-goblin = Goblin(6, 5)
-ogro = Ogro(8, 5)
+wolf = Wolf(4, 5, lang)
+goblin = Goblin(6, 5, lang)
+ogre = Ogre(8, 5, lang)
 
-@when("quem sou")
-@when("who am i")
-def quem_sou():
+@when(lang["action_who_am_i"])
+def who_am_i():
     print(character)
 
-@when("onde estou")
-@when("where i am")
-def onde_estou():
+@when(lang["action_where_i_am"])
+def where_i_am():
     global current_room
     print(current_room)
 
-@when("ir para DIRECTION", context="forest")
-@when("go to DIRECTION", context="forest")
+@when(lang["action_goto_direction"], context="forest")
 def goToDirection(direction):
     global game, character, current_room, latest_room, cavern, forest, latest_context, enemy, wolf
     if (get_context() == 'forest'):
@@ -92,8 +89,7 @@ def check_win():
         time.sleep(2)
         say(lang["after_beat_ogre_2"].format(character.name))
 
-@when("atacar", context="battle")
-@when("attack", context="battle")
+@when(lang["action_battle_attack"], context="battle")
 def attack_battle():
     global character, enemy, current_room, forest, cavern, latest_room, latest_context
     vl_attack = character.attack_action()
@@ -107,16 +103,14 @@ def attack_battle():
         vl_attack = enemy.attack_action()
         character.health_points -= vl_attack
 
-@when("defender", context="battle")
-@when("defend", context="battle")
+@when(lang["action_battle_defend"], context="battle")
 def defend_battle():
     global character, enemy
     vl_defesa = character.defend_action()
     vl_ataque = enemy.attack_action()
     character.health_points = character.health_points - vl_ataque + min(vl_defesa, vl_ataque)
 
-@when("fugir", context="battle")
-@when("escape", context="battle")
+@when(lang["action_battle_escape"], context="battle")
 def escape_battle():
     global character, enemy, latest_context, current_room, latest_room
     if enemy.canRun():
@@ -132,8 +126,7 @@ def escape_battle():
     else:
         say(lang["escape_impossible"].format(character.name))
 
-@when("esquerda", context="cavern.entrance")
-@when("left", context="cavern.entrance")
+@when(lang["action_cavern_left"], context="cavern.entrance")
 def cavern_left():
     global character, latest_context, goblin, enemy, latest_room, cavern_warehouse
     say(lang["cavern_entrance_1"])
@@ -144,8 +137,7 @@ def cavern_left():
     enemy = copy.copy(goblin)
     set_context("battle")
 
-@when("direita", context="cavern.entrance")
-@when("right", context="cavern.entrance")
+@when(lang["action_cavern_left"], context="cavern.entrance")
 def cavern_right():
     global character, current_room, cavern_final
     say(lang["cavern_right"].format(character.name))
@@ -161,108 +153,107 @@ def cavern_right():
     set_context("cavern.final")
     current_room = cavern_final
 
-@when("procurar", context="cavern.warehouse")
-@when("seach", context="cavern.warehouse")
+@when(lang["action_cavern_search"], context="cavern.warehouse")
 def search():
     global character, current_room, cavern_final
     recovered_hp = random.randint(1, 4) + random.randint(1, 4)
     character.health_points += recovered_hp
-    say(f"Diversas caixas estão espalhadas e abrindo, uma a uma, foi possível encontrar um vidro com um líquido vermelho")
-    say(f"{character.name} bebe todo o líquido vermelho recuperando {recovered_hp}HP")
-    say(f"Como não há mais nada de útil nas caixas, {character.name} segue adiante")
-    set_context("caverna.final")
-    current_room = caverna_final
-    exibir_personagem_esta()
+    say(lang["cavern_warehouse_1"])
+    say(lang["cavern_warehouse_2"].format(character.name, recovered_hp))
+    say(lang["cavern_warehouse_3"].format(character.name))
+    set_context("cavern.final")
+    current_room = cavern_final
+    show_where_character()
 
-@when("continuar", context="caverna.deposito")
-def continuar():
-    global character, current_room, caverna_final
-    say(f"Com bastante moral, {character.name} segue adiante no caminho")
-    current_room = caverna_final
-    set_context("caverna.final")
-    exibir_personagem_esta()
+@when(lang["action_cavern_continue"], context="cavern.warehouse")
+def continue_cavern():
+    global character, current_room, cavern_final
+    say(lang["cavern_warehouse_4"].format(character.name))
+    current_room = cavern_final
+    set_context("cavern.final")
+    show_where_character()
 
-def exibir_personagem_esta():
+def show_where_character():
     global character, current_room
-    say(f"{character.name} está {current_room}")
+    say(lang["show_where_character"].format(character.name, current_room))
 
-@when("QUALQUERCOISA", context="caverna.final")
-def caverna_final_action(qualquercoisa):
-    global character, game, enemy, ogro, latest_context, latest_room, caverna_final, current_room
+@when("ANYTHING", context="cavern.final")
+def cavern_final_action(anything):
+    global character, game, enemy, ogre, latest_context, latest_room, cavern_final, current_room
     if (not game.checkIfFinalBossDefeated()):
-        say(f"Através do portal, trepidações no chão são sentidas pelos pés de {character.name}, até seus olhos perceberem um ogro gigante vindo em sua direção")
+        say(lang["cavern_final"].format(character.name))
         game.enterBattleFinalBoss()
-        enemy = copy.copy(ogro)
-        set_context("batalha")
-        latest_context = "caverna.decisao"
-        latest_room = caverna_final
-        current_room = caverna_final
+        enemy = copy.copy(ogre)
+        set_context("battle")
+        latest_context = "cavern.decision"
+        latest_room = cavern_final
+        current_room = cavern_final
     else:
-        exibir_final()
+        show_final_decision()
 
-def exibir_final():
+def show_final_decision():
     global character
-    say(f"Após derrotar o ogro, {character.name} anda até a outra extremidade da sala analisando os pilares")
+    say(lang["final_decision_1"].format(character.name))
     time.sleep(2)
-    say(f"Após investigar o portal e o brilho vermelho, {character.name} se pergunta se deveria [entrar no portal] ou [quebrar o portal].")
+    say(lang["final_decision_2"].format(character.name))
 
-@when("entrar no portal", context="caverna.decisao")
-def entrar_portal():
+@when(lang["action_enter_portal"], context="cavern.decision")
+def enter_portal():
     global character
-    say(f"{character.name} enche os pulmões de ar como se aquela ação aumentasse sua coragem e coloca o seu braço através do portal")
+    say(lang["enter_portal_1"].format(character.name))
     time.sleep(3)
-    say(f"Ficando com mais ânimo, resolve andar através do portal")
+    say(lang["enter_portal_2"])
     time.sleep(3)
-    say(f"Tudo fica claro, impossível de distinguir quaisquer coisas que estariam ao seu redor")
+    say(lang["enter_portal_3"])
     time.sleep(3)
-    say(f"Ao tempo que sua visão fica melhor, {character.name} percebe que está sentado na frente de uma máquina eletrônica escrevendo ações e esperando resultados")
+    say(lang["enter_portal_4"].format(character.name))
     time.sleep(4)
-    say(f"{character.name} se sentindo a tranquilidade do local, sua memória volta e se lembra que está em casa")
+    say(lang["enter_portal_5"].format(character.name))
     time.sleep(3)
-    say(f"Com um sorriso de ponta a ponta, {character.name} segue em direção ao seu quarto para encontrar sua cama e dormir para recuperar as forças para uma próxima aventura")
-    sair()
+    say(lang["enter_portal_6"].format(character.name))
+    exit_action()
 
-@when("quebrar portal", context="caverna.decisao")
+@when(lang["action_break_portal"], context="caverna.decisao")
 def quebrar_portal():
     global character
-    say(f"Com {character.weapon}, {character.name} começa a danificar o portal")
+    say(lang["break_portal_1"].format(character.weapon, character.name))
     time.sleep(2)
-    say(f"O brilho do portal diminui lentamente até escurecer totalmente")
+    say(lang["break_portal_2"])
     time.sleep(2)
-    say(f"{character.name} vê o formato do portal desmoronando aos seus pés")
+    say(lang["break_portal_3"].format(character.name))
     time.sleep(2)
-    say(f"Um rugido estremece a escuridão quando a destruição do portal se completa")
+    say(lang["break_portal_4"])
     time.sleep(2)
-    say(f"{character.name} dá meia volta em direção da entrada da caverna, respira fundo e espera sobreviver nesse novo lugar desconhecido")
-    sair()
+    say(lang["break_portal_5"].format(character.name))
+    exit_action()
 
 
 print(lang["begin_game"])
 
-set_context("floresta")
+set_context("forest")
 latest_context = get_context()
-current_room = floresta
+current_room = forest
 
-help = Help()
+help = Help(lang)
 
-@when("ajuda")
-def ajuda():
+@when(lang["action_help"])
+def help_action():
     help.help(get_context)
 
-@when("sair")
-def sair():
+@when(lang["action_exit"])
+def exit_action():
     quit()
 
 def no_command_matches(command):
     say(random.choice([
-        'Não entendi.',
-        'Você poderia repetir?',
-        'Tente novamente, não compreendi o que você quis dizer'
+        lang["cant_understand_1"],
+        lang["cant_understand_2"],
+        lang["cant_understand_3"]
     ]))
     help.help(get_context())
 
 def prompt():
-    if (get_context() == "batalha"):
+    if (get_context() == "battle"):
         global character
         return '{hp}HP > '.format(hp = character.health_points)
     else:

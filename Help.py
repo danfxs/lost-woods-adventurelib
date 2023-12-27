@@ -1,27 +1,27 @@
 from adventurelib import *
 
 class Help:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, lang) -> None:
+        self.lang = lang
 
     def help(self, context) -> None:
         match context:
-            case "floresta":
-                say("Na floresta, você pode utilizar os comandos:")
-                say("ir para DIRECAO -> DIRECAO pode ser norte/sul/leste/oeste")
-            case "batalha":
-                say("atacar   - ataca o inimigo")
-                say("defender - se defende contra o ataque inimigo acumulando forca para o próximo ataque")
-                say("fugir    - tenta fugir do inimigo")
-            case "caverna.entrada":
-                say("esquerda - escolha a passagem da esquerda")
-                say("direita - escolha a passagem da direita")
-            case "caverna.deposito":
-                say("continuar - segue adiante para a próxima parte da caverna")
-                say("procurar - procura nas caixas por mantimentos")
-            case "caverna.decisao":
-                say("entrar no portal - passar através do portal")
-                say("quebrar o portal - quebra o portal")
-        say("onde estou - descreve o local atual onde seu personagem se encontra")
-        say("ajuda - mostra as opções do seu local atual")
-        say("sair - sair do jogo")
+            case "forest":
+                say(self.lang["help_forest_1"])
+                say(self.lang["action_goto_direction"] + " -> " + self.lang["help_forest_2"])
+            case "battle":
+                say(self.lang["action_battle_attack"] + " -> " + self.lang["help_battle_1"])
+                say(self.lang["action_battle_defend"] + " -> " + self.lang["help_battle_2"])
+                say(self.lang["action_battle_escape"] + " -> " + self.lang["help_battle_3"])
+            case "cavern.entrance":
+                say(self.lang["action_cavern_left"] + " -> " + self.lang["help_cavern_entrance_1"])
+                say(self.lang["action_cavern_right"] + " -> " + self.lang["help_cavern_entrance_2"])
+            case "cavern.warehouse":
+                say(self.lang["action_cavern_search"] + " -> " + self.lang["help_cavern_warehouse_1"])
+                say(self.lang["action_cavern_continue"] + " -> " + self.lang["help_cavern_warehouse_2"])
+            case "cavern.decision":
+                say(self.lang["action_enter_portal"] + " -> " + self.lang["help_cavern_decision_1"])
+                say(self.lang["action_break_portal"] + " -> " + self.lang["help_cavern_decision_2"])
+        say(self.lang["action_where_i_am"] + " -> " + self.lang["help_where"])
+        say(self.lang["action_cavern_continue"] + " -> " + self.lang["help_help"])
+        say(self.lang["action_cavern_search"] + " -> " + self.lang["help_exit"])

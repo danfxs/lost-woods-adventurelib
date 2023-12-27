@@ -3,9 +3,10 @@ from math import ceil
 import random
 
 class Enemy(ABC):
-    def __init__(self, attack, health_points):
+    def __init__(self, attack, health_points, lang):
         self._attack = attack
         self._health_points = health_points
+        self.lang = lang
 
     @property
     def attack(self):
@@ -47,36 +48,36 @@ class Enemy(ABC):
 
 class Wolf(Enemy):    
     def get_name(self):
-        return "o lobo"
+        return self.lang["wolf_description"]
     
     def canRun(self):
         return True
 
     def attack_action(self):
         atk = random.randint(1, self.attack)
-        print(f"O lobo ataca com suas garras afiadas. (-{atk}HP)")
+        print(self.lang["work_attack"].format(atk))
         return atk
 
 class Goblin(Enemy):
     def get_name(self):
-        return "o goblin"
+        return self.lang["goblin_description"]
     
     def canRun(self):
         return True
 
     def attack_action(self):
         atk = random.randint(1, self.attack)
-        print(f"O goblin agita sua arma rude! (-{atk}HP)")
+        print(self.lang["goblin_attack"].format(atk))
         return atk
 
-class Ogro(Enemy):
+class Ogre(Enemy):
     def get_name(self):
-        return "o ogro"
+        return self.lang["ogre_description"]
     
     def canRun(self):
         return False
     
     def attack_action(self):
         atk = random.randint(1, self.attack) + ceil(random.randint(1, self.attack)/2)
-        print(f"O ogro balança seu tacape gigante! (-{atk}HP)")
+        print(self.lang["ogre_attack"].format(atk))
         return atk
